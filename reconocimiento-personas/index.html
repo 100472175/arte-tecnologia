@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <title>mi-cuerpo-es-una-nube</title>
+  </head>
+
+  <body>
+    <button type="button" id="button" onclick="init()">Empezar</button>
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+
+    <div class="texto"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+      //           👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇
+      const URL = "https://teachablemachine.withgoogle.com/models/8eOjIzDa1/";
+
+      const button = document.getElementById("button");
+
+      let model, webcam, labelContainer, maxPredictions;
+
+      let speech_rate = 0.7;
+      let speed = 5000;
+
+      let text = `
+En el bullicioso campus de la Universidad Central, 
+un grupo diverso de estudiantes universitarios se 
+encontraba reunido en la biblioteca, cada uno 
+inmerso en sus propios proyectos y estudios. Entre 
+ellos se encontraban Sofía, una brillante estudiante 
+de ingeniería; Marcos, un apasionado de la literatura 
+creativa; Ana, una entusiasta de las ciencias sociales; 
+y Carlos, un futuro científico de renombre.'\n\n'
+
+Un día, el profesor de física anunció un desafío para 
+los estudiantes: diseñar y construir un dispositivo 
+que pudiera ayudar a personas con discapacidades 
+visuales a navegar de manera más segura por su 
+entorno. Sofía, Marcos, Ana y Carlos, intrigados por 
+el desafío, decidieron unirse para trabajar juntos 
+en el proyecto.\n\n
+
+Con habilidades complementarias, se sumergieron en 
+el trabajo colaborativo. Sofía aportó su experiencia 
+en diseño y tecnología, creando un prototipo funcional 
+del dispositivo. Marcos utilizó su creatividad para 
+idear una interfaz de usuario intuitiva, que permitiera 
+a los usuarios interactuar fácilmente con el dispositivo. 
+Ana realizó investigaciones exhaustivas sobre las 
+necesidades de las personas con discapacidad visual, 
+asegurándose de que el dispositivo fuera verdaderamente 
+útil y accesible. Mientras tanto, Carlos aplicó sus 
+conocimientos en física y electrónica para optimizar 
+el rendimiento del dispositivo y hacerlo lo más 
+preciso posible.\n\n
+
+A medida que avanzaban en el proyecto, enfrentaron 
+desafíos y obstáculos, pero siempre encontraron 
+soluciones trabajando juntos. Se apoyaron mutuamente, 
+compartieron ideas y habilidades, y aprendieron unos 
+de otros en el proceso. La biblioteca se convirtió 
+en su lugar de reunión habitual, donde intercambiaban 
+ideas y debatían sobre cómo mejorar su creación.\n\n
+
+Después de semanas de arduo trabajo, finalmente 
+completaron el dispositivo. Presentaron su proyecto 
+al profesor y quedaron sorprendidos por la positiva 
+reacción que recibieron. El dispositivo no solo 
+cumplía con los requisitos del desafío, sino que 
+también superaba las expectativas, gracias a la 
+colaboración y el esfuerzo conjunto de todos los 
+miembros del equipo.\n\n
+
+Su proyecto no solo fue un éxito académico, sino 
+que también tuvo un impacto real en la comunidad. 
+El dispositivo ayudó a personas con discapacidades 
+visuales a moverse con mayor seguridad y confianza 
+en su entorno, demostrando el poder de la colaboración 
+entre personas universitarias para generar soluciones 
+innovadoras y significativas. Desde entonces, Sofía, 
+Marcos, Ana y Carlos continuaron colaborando en 
+proyectos futuros, convirtiéndose en un equipo formidable 
+unido por su pasión por hacer del mundo un lugar mejor.\n\n
+`;
+
+      const div = document.querySelector(".texto");
+
+      async function init() {
+        labelContainer = document.getElementById("label-container");
+        labelContainer.innerHTML = "Cargando...";
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        const flip = true;
+        webcam = new tmImage.Webcam(200, 200, flip);
+        await webcam.setup();
+        await webcam.play();
+        button.classList.add("hidden");
+        labelContainer.innerHTML = "";
+        window.requestAnimationFrame(loop);
+
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+        for (let i = 0; i < maxPredictions; i++) {
+          labelContainer.appendChild(document.createElement("div"));
+        }
+      }
+
+      async function loop() {
+        webcam.update();
+        await predict();
+        window.requestAnimationFrame(loop);
+      }
+
+      async function predict() {
+        const prediction = await model.predict(webcam.canvas);
+
+        // 👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇👇
+        if (prediction[0].probability.toFixed(2) === "1.00") {
+          speed = 200;
+        } else if (prediction[1].probability.toFixed(2) === "1.00") {
+          speed = 100;
+        } else if (prediction[2].probability.toFixed(2) === "1.00") {
+          speed = 50;
+        } else if (prediction[0].probability.toFixed(2) === "1.00") {
+          speed = 20;
+        }
+      }
+
+      function textTypingEffect(element, text, i = 0) {
+        if (i === 0) {
+          element.textContent = "";
+        }
+        element.textContent += text[i];
+
+        if (i === text.length - 1) {
+          return;
+        }
+
+        setTimeout(() => {
+          textTypingEffect(element, text, i + 1);
+        }, speed);
+      }
+
+      const speech = new SpeechSynthesisUtterance(text);
+      speech.lang = "es"; // Establece el idioma del texto a español
+      speech.rate = speech_rate; // Ajusta la velocidad de lectura (0.5 sería más lento, 2 sería más rápido)
+      window.speechSynthesis.speak(speech);
+
+      textTypingEffect(div, text);
+    </script>
+  </body>
+</html>
