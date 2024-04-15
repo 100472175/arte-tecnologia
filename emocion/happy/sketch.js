@@ -1,7 +1,7 @@
 let capture;
 let capturewidth = 640 * 1.5;
 let captureheight = 480 * 1.5;
-let color = "violet";
+let color = "blue";
 var audio = new Audio("elo.mp3");
 var audio_triste = new Audio("sad_elo.mp3");
 
@@ -42,7 +42,6 @@ function gotFaces(error, result) {
     detections = [];
   }
   faceapi.detect(gotFaces);
-  // console.log(detections);
 }
 
 function draw() {
@@ -60,14 +59,12 @@ function draw() {
         circle(points[j]._x, points[j]._y, 10);
       }
 
+      
       beginShape();
       for (let j = 0; j < points.length; j++) {
         vertex(points[j]._x, points[j]._y);
       }
       endShape(CLOSE);
-
-      var happyLevel = detections[i].expressions.happy;
-      var sadLevel = detections[i].expressions.sad;
 
       push();
 
@@ -83,28 +80,25 @@ function draw() {
 
       if (detections[i].expressions.happy > 0.3) {
         textSize(50);
-        text("Estas feliz!!! :D", 50, 100);
+        text("Estás feliz!!!", 50, 100);
         color = "yellow";
         audio.play();
         if (!audio_triste.paused) {
           audio_triste.pause();
         }
+        document.getElementById("sad_cat").style.display = "none";
+        document.getElementById("happy_cat").style.display = "block";
       } else {
         textSize(50);
-        text("Estas triste :(", 50, 100);
-        color = "violet";
+        text("Estás triste...", 50, 100);
+        color = "blue";
         if (!audio.paused) {
           audio.pause();
         }
         audio_triste.play();
+        document.getElementById("happy_cat").style.display = "none";
+        document.getElementById("sad_cat").style.display = "block";
       }
-
-      /*
-          fill(220);
-          circle(30,30,20 * neutralLevel);
-          text("NEUTRAL VALUE: " + neutralLevel, 40,30);
-          pop();
-          */
     }
   }
   pop();

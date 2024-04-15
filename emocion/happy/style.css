@@ -4,7 +4,23 @@ body {
   padding: 0;
 }
 canvas {
-  margin-left: 15%;
+  margin-left: 10%;
   margin-top: 5%;
   display: block;
+}
+
+#sad_cat {
+  position: absolute;
+  max-height: 80vw;
+  display: none;
+  bottom:20vh;
+  right:5vw;
+}
+
+#happy_cat {
+  position: absolute;
+  max-height: 80vw;
+  display: none;
+  bottom:40vh;
+  right:10vw;
 }
