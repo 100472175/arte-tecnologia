@@ -3,6 +3,7 @@ let capturewidth = 640 * 1.5;
 let captureheight = 480 * 1.5;
 let color = "violet";
 var audio = new Audio("elo.mp3");
+var audio_triste = new Audio("sad_elo.mp3");
 
 let emotions = ["happy"];
 
@@ -35,7 +36,11 @@ function gotFaces(error, result) {
     console.log(error);
     return;
   }
-  detections = result;
+  if (result.length > 0) {
+    detections = [result[0]];
+  } else {
+    detections = [];
+  }
   faceapi.detect(gotFaces);
   // console.log(detections);
 }
@@ -44,29 +49,6 @@ function draw() {
   background(0);
 
   capture.loadPixels();
-
-  /*
-  for (let y = 0; y < capture.height; y+=5){
-    for (let x = 0; x < capture.width; x +=5){
-      
-      const pixelIndex = (x + y * capture.width) * 4
-      const r = capture.pixels[pixelIndex + 0];
-      const g = capture.pixels[pixelIndex + 1];
-      const b = capture.pixels[pixelIndex + 2];
-      const a = capture.pixels[pixelIndex + 3];
-      
-      const avg = (r + g + b) / 3;
-      
-      var diameter = map(avg, 0, 255, 1, 7);
-      
-      circle(x,y, diameter);
-      
-      
-      
-    }
-  }
-  
-  */
 
   push();
   fill(color);
@@ -99,16 +81,22 @@ function draw() {
         rect(40, 30 + 30 * k, thisemotionlevel * 100, 10);
       }
 
-      if (detections[i].expressions.happy > 0.1) {
-        textSize(30);
-        text("Estas feliz", 50, 100);
+      if (detections[i].expressions.happy > 0.3) {
+        textSize(50);
+        text("Estas feliz!!! :D", 50, 100);
         color = "yellow";
         audio.play();
+        if (!audio_triste.paused) {
+          audio_triste.pause();
+        }
       } else {
+        textSize(50);
+        text("Estas triste :(", 50, 100);
         color = "violet";
         if (!audio.paused) {
           audio.pause();
         }
+        audio_triste.play();
       }
 
       /*
